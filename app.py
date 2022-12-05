@@ -475,11 +475,13 @@ def get_db_connection():
 
 @app.errorhandler(HTTP_404_NOT_FOUND)
 def handle_404(e):
-    return jsonify({'error':'the page is not found'}), HTTP_404_NOT_FOUND
+    return render_template("404page.html")
+    #return jsonify({'error':'the page is not found'}), HTTP_404_NOT_FOUND
 
 @app.errorhandler(HTTP_500_INTERNAL_SERVER_ERROR)
 def handle_500(e):
-    return jsonify({'internal server error': 'return back to login page'}), HTTP_500_INTERNAL_SERVER_ERROR
+    return render_template("500page.html")
+    #return jsonify({'internal server error': 'return back to login page'}), HTTP_500_INTERNAL_SERVER_ERROR
 
 if __name__ == "__main__":
     app.run(debug=True)
