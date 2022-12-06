@@ -78,6 +78,11 @@ class adminkey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     key = db.Column(db.String(20), nullable=False, unique=True)
 
+class post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.String(200), nullable=False)
+
+
 class groupfiles(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20))
@@ -128,6 +133,10 @@ class AdminRegisterForm(FlaskForm):
 
 class CommentForm(FlaskForm):
     comment = StringField(validators=[InputRequired(), Length(min=1, max=80)], render_kw={"placeholder": "comment"})
+
+class PostCommentForm(FlaskForm):
+    comment = StringField(validators=[InputRequired(), Length(min=1, max=200)], render_kw={"placeholder": "comment"})
+
 
 class AdminKeyForm(FlaskForm):
     admin_key = StringField(validators=[InputRequired(), Length(min=8, max=8)], render_kw={"placeholder": "ADMIN KEY"})
@@ -392,7 +401,6 @@ def download(upload_id):
     return send_file(BytesIO(upload.data),download_name=temp,as_attachment=True)
 
 
-
 #delete images
 @app.route('/delete/<upload_id>', methods=['POST'])
 @login_required
@@ -420,6 +428,7 @@ def deletefiles(upload_id):
     return render_template("display_all_files.html")
 
 
+
 #display images page
 @app.route('/displayimages/<upload_id>')
 @login_required
@@ -438,6 +447,40 @@ def display_all_files():
     #image = b64encode(upload.data).decode("utf-8")
     #return render_template("displayimages.html", obj=upload, image=image)
 
+
+#post
+@app.route("/display_all_post")
+@login_required
+def display_all_post():
+    files=post().query.all()
+   # files=files.decode()
+    return render_template("display_all_post.html",files=files)
+
+@app.route("/post_upload" , methods=['POST', 'GET'])
+@login_required
+def post_upload():
+    form = PostCommentForm()
+
+    if request.method == 'POST':
+        comment1 = form.comment.data
+        if len(comment1)<200:
+            comment_encoded = comment1.encode(encoding='utf-8')
+            print(comment1,"hello",comment_encoded)
+            upload = post(comment=comment_encoded)
+            db.session.add(upload)
+            db.session.commit()
+        else:
+            flash("comment length to long")
+        return render_template('post_upload.html',form=form)
+    return render_template('post_upload.html',form=form)
+
+@app.route('/deletepost/<upload_id>', methods=['POST'])
+@login_required
+def deletepost(upload_id):
+    temp_delete=post.query.filter_by(id=upload_id).first()
+    db.session.delete(temp_delete)
+    db.session.commit()
+    return render_template("display_all_post.html")
 
 @app.route("/display_all_images")
 @login_required
