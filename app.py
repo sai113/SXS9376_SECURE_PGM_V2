@@ -469,6 +469,7 @@ def post_upload():
             upload = post(comment=comment_encoded)
             db.session.add(upload)
             db.session.commit()
+            return render_template('display_all_post.html',form=form)
         else:
             flash("comment length to long")
         return render_template('post_upload.html',form=form)
